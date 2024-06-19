@@ -1,0 +1,24 @@
+---
+# defaults file for ansible-role-users
+
+# The location to store ssh keys for user
+users_ssh_key_directory: ssh_keys
+
+# The default shell if not overwritten.
+default_user_shell: /bin/bash
+
+# manage cron permissions via /etc/cron.allow
+users_cron_allow: true
+
+# should homedirectories be created?
+users_create_home: true
+
+users_sudo_includedir: "#includedir /etc/sudoers.d"
+
+default_user_group: "users"
+
+users_home_base_dir: "/home"
+
+users_requirements: [ "openssh-server" ]
+
+users_services: [ "sshd" ]

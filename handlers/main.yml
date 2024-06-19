@@ -1,0 +1,8 @@
+---
+# handlers file for ansible-role-users
+
+- name: Restart sshd service
+  ansible.builtin.service:
+    name: sshd
+    state: restarted
+  #  when: "ssh_service != None and ssh_service_state == 'started'\n"
