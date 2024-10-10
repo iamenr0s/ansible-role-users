@@ -1,0 +1,67 @@
+---
+# tasks file for ansible-role-users
+
+- name: Users role | Manage user {{ user.name }}
+  ansible.builtin.user:
+    name: "{{ user.name }}"
+    comment: "{{ user.comment | default(omit) }}"
+    create_home: "{{ users_create_home }}"
+    uid: "{{ user.uid | default(omit) }}"
+    group: "{{ user.group | default(default_user_group) }}"
+    groups: "{{ user.groups | default([]) | join(',') or omit }}"
+    password: "{{ lookup('ansible.builtin.password', '/dev/null length=15 chars=ascii_letters,digits') }}"
+    password_lock: "{{ user.password_lock | default(omit) }}"
+    update_password: "{{ user.update_password | default('on_create') }}"
+    shell: "{{ user.shell | default(default_user_shell) }}"
+    state: "{{ user.state | default('present') }}"
+    expires: "{{ user.expires | default(omit) }}"
+    system: "{{ user.system | default(omit) }}"
+    password_max_age: "{{ user.password_max_age | default(omit) }}"
+
+- name: Users role | Decrypt vault file containing public keys
+  ansible.builtin.include_vars:
+    file: vault_public_keys.yml
+    name: vault_public_keys
+  #no_log: true
+
+- name: Users role | Ensure .ssh directory exists for {{ user.name }}
+  ansible.builtin.file:
+    path: "{{ users_home_base_dir }}/{{ user.name }}/.ssh"
+    state: directory
+    mode: "0700"
+  become: true
+  become_user: "{{ user.name }}"
+  when:
+    - (user.manage_ssh_key is defined and user.manage_ssh_key)
+      or user.private_keys is defined
+
+- name: Users role | Generate SSH key pair for {{ user.name }}
+  community.crypto.openssh_keypair:
+    path: "{{ users_home_base_dir }}/{{ user.name }}/.ssh/id_rsa"
+  become: true
+  become_user: "{{ user.name }}"
+  when:
+    - (user.manage_ssh_key is defined and user.manage_ssh_key)
+      or user.private_keys is defined
+
+- name: Users role | Copy authorized keys for {{ user.name }}
+  ansible.builtin.copy:
+    content: "{{ vault_public_keys[user.name + '_pub_key'] }}"
+    dest: "{{ users_home_base_dir }}/{{ user.name }}/.ssh/authorized_keys"
+    mode: "0644"
+  become: true
+  become_user: "{{ user.name }}"
+  when:
+    - (user.manage_ssh_key is defined and user.manage_ssh_key)
+      or user.private_keys is defined
+
+- name: Users role | Add ansible user to sudoers
+  ansible.builtin.template:
+    dest: "/etc/sudoers.d/{{ user.name | replace('.', 'dot') }}"
+    src: sudo.j2
+    mode: "0640"
+    validate: "visudo -cf %s"
+  when:
+    - user.sudo_options is defined
+  loop_control:
+    label: "{{ user.name }}"

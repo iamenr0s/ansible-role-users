@@ -1,0 +1,8 @@
+---
+# defaults file for ansible-role-users
+
+default_user_shell: /bin/bash
+users_create_home: true
+users_sudo_includedir: "#includedir /etc/sudoers.d"
+default_user_group: "users"
+users_home_base_dir: "/home"
