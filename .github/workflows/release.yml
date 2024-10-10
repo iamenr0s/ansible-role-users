@@ -2,13 +2,13 @@
 name: Release
 
 on:
-  push:
-    tags:
-      - '*'
   workflow_run:
     workflows: ['Molecule']
     types:
-      - completed
+      - completed  
+  push:
+    tags:
+      - '*'
 
 jobs:
   release:
