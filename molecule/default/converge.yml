@@ -3,6 +3,13 @@
 - name: Converge
   hosts: all
   gather_facts: no
+  vars:
+    ansible_python_interpreter: >-
+      {{
+        '/usr/bin/python3.9' if lookup('env','MOLECULE_DISTRO') in ['almalinux8','rockylinux8']
+        else '/usr/bin/python3.7' if lookup('env','MOLECULE_DISTRO') in ['debian10']
+        else '/usr/bin/python3'
+      }}
   pre_tasks:
     - name: Bootstrap Python 3 if missing (raw)
       ansible.builtin.raw: >
