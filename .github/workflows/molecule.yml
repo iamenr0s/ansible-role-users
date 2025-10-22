@@ -68,7 +68,7 @@ jobs:
           echo ${{ secrets.ANSIBLE_VAULT_PASSWORD }} > ~/.vault-password
 
       - name: Run Molecule tests.
-        run: molecule test
+        run: molecule -vvv test
         env:
           PY_COLORS: '1'
           ANSIBLE_FORCE_COLOR: '1'
