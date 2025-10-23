@@ -3,4 +3,4 @@ molecule-plugins[podman]
 paramiko
 ansible-lint
 ansible
-cryptography>=3.3
+cryptography
