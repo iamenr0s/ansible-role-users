@@ -10,6 +10,15 @@
         bash -lc 'mkdir -p /tmp && chmod 0777 /tmp'
       changed_when: false
 
+- name: Install Python 3.9 on Debian 10
+  when: ansible_distribution == "Debian" and ansible_distribution_major_version == "10"
+  block:
+    - apt:
+        name:
+          - python3.9
+          - python3.9-distutils
+        state: present
+
     - name: Install Python 3 (raw, cross-platform)
       ansible.builtin.raw: >
         bash -lc '

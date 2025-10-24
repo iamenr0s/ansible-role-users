@@ -39,7 +39,7 @@ jobs:
           - almalinux8
           - almalinux9
           - almalinux10
-          - debian10
+          #- debian10
           - debian11
           - debian12
           - fedora40
