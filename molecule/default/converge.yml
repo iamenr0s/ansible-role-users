@@ -74,6 +74,8 @@
           manage_ssh_key: true
           copy_private_key: true
         - name: multiplekeys
+          manage_ssh_key: true
+          copy_private_key: true
           authorized_keys:
             - "ssh-rsa ABC1234"
             - "ssh-rsa ABC12345"
@@ -82,6 +84,8 @@
           password: "$6$mysecretsalt$qJbapG68nyRab3gxvKWPUcs2g3t0oMHSHMnSKecYNpSi3CuZm.GbBqXO8BE6EI6P1JUefhA0qvD7b5LSh./PU1"
           update_password: on_create
         - name: remotekey
+          manage_ssh_key: true
+          copy_private_key: true
           authorized_keys:
             # You can also download a public key from a URL.
             - "https://raw.githubusercontent.com/shaanr/smdb/master/file.pub"
@@ -94,6 +98,8 @@
             - "ALL= NOPASSWD: /usr/bin/systemctl start httpd"
             - "ALL= NOPASSWD: /usr/bin/systemctl stop httpd"
         - name: myprivkeyuser
+          manage_ssh_key: true
+          copy_private_key: true
           private_keys:
             - name: id_rsa
               content: |
