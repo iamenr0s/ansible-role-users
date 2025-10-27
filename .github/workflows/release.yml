@@ -26,4 +26,5 @@ jobs:
       - name: 'Release on galaxy'
         uses: ansible-actions/ansible-galaxy-action@v1.2.0
         with:
-          galaxy_api_key: ${{ secrets.GALAXY_API_KEY }}s
+          galaxy_api_key: ${{ secrets.GALAXY_API_KEY }}
+          galaxy_api: 'https://galaxy.ansible.com/api/'
