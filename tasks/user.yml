@@ -40,16 +40,16 @@
     - (user.manage_ssh_key is defined and user.manage_ssh_key)
       or user.private_keys is defined
 
- - name: Users role | Copy authorized keys for {{ user.name }} from vault
-   ansible.builtin.copy:
-     content: "{{ vault_public_keys.get(user.name ~ '_pub_key', '') }}"
-     dest: "{{ users_home_base_dir }}/{{ user.name }}/.ssh/authorized_keys"
-     mode: "0644"
-   when:
-     - (user.manage_ssh_key is defined and user.manage_ssh_key)
-       or user.private_keys is defined
-     - vault_public_keys is defined
-     - (user.name ~ '_pub_key') in vault_public_keys
+- name: Users role | Copy authorized keys for {{ user.name }} from vault
+  ansible.builtin.copy:
+    content: "{{ vault_public_keys.get(user.name ~ '_pub_key', '') }}"
+    dest: "{{ users_home_base_dir }}/{{ user.name }}/.ssh/authorized_keys"
+    mode: "0644"
+  when:
+    - (user.manage_ssh_key is defined and user.manage_ssh_key)
+      or user.private_keys is defined
+    - vault_public_keys is defined
+    - (user.name ~ '_pub_key') in vault_public_keys
 
 - name: Users role | Set authorized_keys for {{ user.name }} from list
   ansible.builtin.copy:
