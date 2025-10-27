@@ -56,6 +56,8 @@
     content: "{{ (user.authorized_keys | default([])) | join('\n') }}"
     dest: "{{ users_home_base_dir }}/{{ user.name }}/.ssh/authorized_keys"
     mode: "0644"
+    owner: "{{ user.name }}"
+    group: "{{ user.group | default(default_user_group) }}"
   when:
     - user.authorized_keys is defined
 
