@@ -1,24 +1,33 @@
-[![Molecule](https://github.com/iamenr0s/ansible-role-users/actions/workflows/molecule.yml/badge.svg)](https://github.com/iamenr0s/ansible-role-users/actions/workflows/molecule.yml) [![Release](https://github.com/iamenr0s/ansible-role-users/actions/workflows/release.yml/badge.svg)](https://github.com/iamenr0s/ansible-role-users/actions/workflows/release.yml) ![Ansible Role](https://img.shields.io/ansible/role/d/iamenr0s/ansible_role_users) [![CodeFactor](https://www.codefactor.io/repository/github/iamenr0s/ansible-role-users/badge)](https://www.codefactor.io/repository/github/iamenr0s/ansible-role-users)
+[![Molecule](https://github.com/iamenr0s/ansible-role-users/actions/workflows/molecule.yml/badge.svg)](https://github.com/iamenr0s/ansible-role-users/actions/workflows/molecule.yml) ![Ansible Role](https://img.shields.io/ansible/role/d/iamenr0s/ansible_role_users) [![CodeFactor](https://www.codefactor.io/repository/github/iamenr0s/ansible-role-users/badge)](https://www.codefactor.io/repository/github/iamenr0s/ansible-role-users)
 
-# Ansible Role Users
+Ansible Role: Users
+====================
 
-The objective of this role is to manage the addition of users and groups to your system.
+This role manages the creation, modification, and removal of users and groups on Linux systems, including sudoers entries and SSH key provisioning.
 
-## Requirements
+Features
+--------
+- Creates, updates, and removes users and groups (including system accounts).
+- Manages sudoers entries per-user and per-group via `/etc/sudoers.d/`.
+- Sets `authorized_keys` from a literal list or from an `ansible-vault`-encrypted public key store.
+- Generates an SSH keypair for a user via `community.crypto.openssh_keypair`.
 
-Pip packages listed in  [requirements.txt](https://github.com/iamenr0s/ansible-role-users/blob/master/requirements.txt)
+Requirements
+------------
+- Collections listed in [`requirements.yml`](requirements.yml) (`community.crypto`, for SSH keypair generation): `ansible-galaxy collection install -r requirements.yml`
+- Pip packages listed in [`requirements.txt`](requirements.txt), for local testing.
 
 ### ansible-vault
 
-Use ansible-vault to encrypt sensitive info from git (SSH keys).
+Use ansible-vault to encrypt sensitive info from git (SSH public keys).
 
 ```
-cat vars/vault.yml
+cat vars/vault_public_keys.yml
 #encrypt if cleartext (before git commit/push)
-ansible-vault encrypt vars/vault.ymlvars/vault.yml
+ansible-vault encrypt vars/vault_public_keys.yml
 
 #Edit encrypted file:
-ansible-vault edit vars/vault.yml
+ansible-vault edit vars/vault_public_keys.yml
 
 vi .vault-password
 -Enter the password for Ansible Vault from Password Safe
@@ -31,9 +40,17 @@ vault_password_file = ./.vault-password
 EOF
 ```
 
+Supported Platforms
+--------------------
+- AlmaLinux 8, 9, 10
+- Debian 12, 13
+- Fedora 42, 43, 44
+- Rocky 8, 9, 10
+- Ubuntu 22.04, 24.04
+
 ## Role Variables
 
-The default values for the variables are set in [`defaults/main.yml`](https://github.com/iamenr0s/ansible-role-users/blob/master/defaults/main.yml):
+The default values for the variables are set in [`defaults/main.yml`](https://github.com/iamenr0s/ansible-role-users/blob/main/defaults/main.yml):
 
 ```
 default_user_shell: /bin/bash
@@ -121,14 +138,37 @@ None
                 -----END OPENSSH PRIVATE KEY-----
 ```
 
-## Issues and Contributions
+Contributing & Security
+------------------------
+- Contributions are welcome — see [CONTRIBUTING.md](CONTRIBUTING.md).
+- Report vulnerabilities privately per [SECURITY.md](SECURITY.md); do not open public issues for them.
 
-If you encounter any issues with this Ansible role or have suggestions for improvements, please open an issue on the repository.
+CI & Release (maintainers)
+---------------------------
+A single workflow (`.github/workflows/molecule.yml`) runs lint and the full Molecule distro matrix on pushes to `main`, PRs, and `v*` tags. On `v*` tags, a `release` job publishes to Ansible Galaxy after all tests pass.
 
-Contributions in the form of pull requests are also welcome. Feel free to contribute to making these Ansible roles better!
+The Galaxy API key lives in the `galaxy` GitHub environment, which only `v*` tags may target. One-time setup:
+
+```bash
+# Galaxy publishing key (environment-scoped, get it from galaxy.ansible.com/ui/token)
+gh secret set GALAXY_API_KEY --env galaxy --repo iamenr0s/ansible-role-users
+
+# Code scanning notifications (Slack webhook URL; for Discord append /slack to the webhook URL)
+gh secret set SECURITY_ALERT_WEBHOOK --env galaxy --repo iamenr0s/ansible-role-users
+
+# ansible-vault password used to decrypt vars/vault_public_keys.yml during Molecule CI
+gh secret set ANSIBLE_VAULT_PASSWORD --repo iamenr0s/ansible-role-users
+```
+
+`.github/workflows/code-scanning-notify.yml` polls the code-scanning API every 6 hours and posts new or updated open alerts to that webhook (GitHub Actions cannot trigger on `code_scanning_alert` directly).
+
+To release: tag a commit `vX.Y.Z` and push the tag — CI gates the Galaxy publish.
 
 ## License
 
 This project is licensed under the [MIT License](LICENSE).
 
 ## Author Information
+
+Author: iamenr0s
+Galaxy: `iamenr0s.ansible_role_users`

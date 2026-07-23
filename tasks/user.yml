@@ -17,12 +17,17 @@
     expires: "{{ user.expires | default(omit) }}"
     system: "{{ user.system | default(omit) }}"
     password_max_age: "{{ user.password_max_age | default(omit) }}"
+  tags:
+    - users
 
 - name: Users role | Decrypt vault file containing public keys
   ansible.builtin.include_vars:
     file: vault_public_keys.yml
     name: vault_public_keys
-  #no_log: true
+  no_log: true
+  tags:
+    - users
+    - ssh
 
 - name: Users role | Ensure .ssh directory exists for {{ user.name }}
   ansible.builtin.file:
@@ -34,7 +39,9 @@
   when:
     - (user.manage_ssh_key is defined and user.manage_ssh_key)
       or user.private_keys is defined
-      or user.authorized_keys is defined      
+      or user.authorized_keys is defined
+  tags:
+    - ssh
 
 - name: Users role | Generate SSH key pair for {{ user.name }}
   community.crypto.openssh_keypair:
@@ -42,22 +49,26 @@
   when:
     - (user.manage_ssh_key is defined and user.manage_ssh_key)
       or user.private_keys is defined
+  tags:
+    - ssh
 
-- name: Users role | Copy authorized keys for {{ user.name }} from vault
+- name: Users role | Copy authorized keys from vault for {{ user.name }}
   ansible.builtin.copy:
     content: "{{ vault_public_keys.get(user.name ~ '_pub_key', '') }}"
     dest: "{{ users_home_base_dir }}/{{ user.name }}/.ssh/authorized_keys"
     mode: "0644"
     owner: "{{ user.name }}"
-    group: "{{ user.group | default(default_user_group) }}"      
+    group: "{{ user.group | default(default_user_group) }}"
   when:
     - (user.manage_ssh_key is defined and user.manage_ssh_key)
       or user.private_keys is defined
     - vault_public_keys is defined
     - (user.name ~ '_pub_key') in vault_public_keys
-    - user.authorized_keys is not defined      
+    - user.authorized_keys is not defined
+  tags:
+    - ssh
 
-- name: Users role | Set authorized_keys for {{ user.name }} from list
+- name: Users role | Set authorized_keys from list for {{ user.name }}
   ansible.builtin.copy:
     content: "{{ (user.authorized_keys | default([])) | join('\n') }}"
     dest: "{{ users_home_base_dir }}/{{ user.name }}/.ssh/authorized_keys"
@@ -66,6 +77,8 @@
     group: "{{ user.group | default(default_user_group) }}"
   when:
     - user.authorized_keys is defined
+  tags:
+    - ssh
 
 - name: Users role | Add ansible user to sudoers
   ansible.builtin.template:
@@ -75,5 +88,5 @@
     validate: "visudo -cf %s"
   when:
     - user.sudo_options is defined
-  loop_control:
-    label: "{{ user.name }}"
+  tags:
+    - sudo

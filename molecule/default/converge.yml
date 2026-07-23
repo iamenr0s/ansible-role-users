@@ -31,7 +31,7 @@
       ansible.builtin.meta: reset_connection
 
   roles:
-    - role: iamenr0s.ansible_role_users
+    - role: "{{ playbook_dir }}/../.."
       # You can create groups:
       users_groups:
         - name: mygroup

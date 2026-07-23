@@ -1,0 +1,127 @@
+---
+
+- name: Verify
+  hosts: all
+  gather_facts: false
+  become: false
+
+  tasks:
+    - name: Verify | Look up myuser in passwd
+      ansible.builtin.command:
+        cmd: getent passwd myuser
+      register: __verify_myuser_passwd
+      changed_when: false
+
+    - name: Verify | Assert myuser has the configured uid, shell and primary group
+      ansible.builtin.assert:
+        that:
+          - __verify_myuser_passwd.stdout.split(':')[2] == '1024'
+          - __verify_myuser_passwd.stdout.split(':')[6] == '/bin/bash'
+        fail_msg: "Unexpected passwd entry for myuser: {{ __verify_myuser_passwd.stdout }}"
+
+    - name: Verify | Assert notuser was removed
+      ansible.builtin.command:
+        cmd: getent passwd notuser
+      register: __verify_notuser_passwd
+      changed_when: false
+      failed_when: __verify_notuser_passwd.rc == 0
+
+    - name: Verify | Look up mygroup in group
+      ansible.builtin.command:
+        cmd: getent group mygroup
+      register: __verify_mygroup
+      changed_when: false
+
+    - name: Verify | Assert mygroup has the configured gid
+      ansible.builtin.assert:
+        that:
+          - __verify_mygroup.stdout.split(':')[2] == '1024'
+        fail_msg: "Unexpected group entry for mygroup: {{ __verify_mygroup.stdout }}"
+
+    - name: Verify | Assert notgroup was removed
+      ansible.builtin.command:
+        cmd: getent group notgroup
+      register: __verify_notgroup
+      changed_when: false
+      failed_when: __verify_notgroup.rc == 0
+
+    - name: Verify | Assert systemuser was created as a system account
+      ansible.builtin.command:
+        cmd: getent passwd systemuser
+      register: __verify_systemuser
+      changed_when: false
+
+    - name: Verify | Assert systemuser uid is below the system uid ceiling
+      ansible.builtin.assert:
+        that:
+          - __verify_systemuser.stdout.split(':')[2] | int < 1000
+        fail_msg: "systemuser was not created as a system account: {{ __verify_systemuser.stdout }}"
+
+    - name: Verify | Read sudoers file for myuser
+      ansible.builtin.command:
+        cmd: cat /etc/sudoers.d/myuser
+      register: __verify_myuser_sudoers
+      changed_when: false
+
+    - name: Verify | Assert myuser sudoers entry matches sudo_options
+      ansible.builtin.assert:
+        that:
+          - "'myuser ALL=(ALL) NOPASSWD: ALL' in __verify_myuser_sudoers.stdout"
+
+    - name: Verify | Read sudoers file for multisudo
+      ansible.builtin.command:
+        cmd: cat /etc/sudoers.d/multisudo
+      register: __verify_multisudo_sudoers
+      changed_when: false
+
+    - name: Verify | Assert multisudo has every configured sudo_options line
+      ansible.builtin.assert:
+        that:
+          - "'multisudo ALL= NOPASSWD: /usr/bin/systemctl restart httpd' in __verify_multisudo_sudoers.stdout"
+          - "'multisudo ALL= NOPASSWD: /usr/bin/systemctl start httpd' in __verify_multisudo_sudoers.stdout"
+          - "'multisudo ALL= NOPASSWD: /usr/bin/systemctl stop httpd' in __verify_multisudo_sudoers.stdout"
+
+    - name: Verify | Stat the .ssh directory for keyuser
+      ansible.builtin.stat:
+        path: /home/keyuser/.ssh
+      register: __verify_keyuser_ssh_dir
+
+    - name: Verify | Assert keyuser's .ssh directory exists with mode 0700
+      ansible.builtin.assert:
+        that:
+          - __verify_keyuser_ssh_dir.stat.exists
+          - __verify_keyuser_ssh_dir.stat.isdir
+          - __verify_keyuser_ssh_dir.stat.mode == '0700'
+
+    - name: Verify | Stat the generated keypair for keyuser
+      ansible.builtin.stat:
+        path: /home/keyuser/.ssh/id_rsa
+      register: __verify_keyuser_keypair
+
+    - name: Verify | Assert a keypair was generated for keyuser
+      ansible.builtin.assert:
+        that:
+          - __verify_keyuser_keypair.stat.exists
+
+    - name: Verify | Read authorized_keys for myuser
+      ansible.builtin.command:
+        cmd: cat /home/myuser/.ssh/authorized_keys
+      register: __verify_myuser_authorized_keys
+      changed_when: false
+
+    - name: Verify | Assert myuser's authorized_keys matches the configured list
+      ansible.builtin.assert:
+        that:
+          - __verify_myuser_authorized_keys.stdout == 'ssh-rsa ABC123'
+
+    - name: Verify | Read authorized_keys for multiplekeys
+      ansible.builtin.command:
+        cmd: cat /home/multiplekeys/.ssh/authorized_keys
+      register: __verify_multiplekeys_authorized_keys
+      changed_when: false
+
+    - name: Verify | Assert multiplekeys' authorized_keys contains both configured keys
+      ansible.builtin.assert:
+        that:
+          - "'ssh-rsa ABC1234' in __verify_multiplekeys_authorized_keys.stdout"
+          - "'ssh-rsa ABC12345' in __verify_multiplekeys_authorized_keys.stdout"

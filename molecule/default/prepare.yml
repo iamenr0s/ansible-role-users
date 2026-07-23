@@ -24,10 +24,5 @@
         fi'
       changed_when: true
 
-    - name: Prefer Python 3.9 if available
-      ansible.builtin.raw: >
-        bash -lc 'if [ -x /usr/bin/python3.9 ]; then ln -sf /usr/bin/python3.9 /usr/bin/python3; fi'
-      changed_when: false
-
     - name: Reset connection to use installed Python
       ansible.builtin.meta: reset_connection

@@ -10,6 +10,8 @@
     loop_var: group
   when:
     - users_groups is defined
+  tags:
+    - groups
 
 - name: Ensure the /etc/sudoers.d directory is included
   ansible.builtin.lineinfile:
@@ -17,6 +19,8 @@
     line: "{{ users_sudo_includedir }}"
     regexp: "^(@|#)includedir"
     validate: "visudo --check --file %s"
+  tags:
+    - sudo
 
 - name: Loop over users
   ansible.builtin.include_tasks:
@@ -27,3 +31,5 @@
     loop_var: user
   when:
     - users is defined
+  tags:
+    - users

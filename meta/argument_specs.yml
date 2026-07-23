@@ -1,0 +1,28 @@
+---
+
+argument_specs:
+  main:
+    short_description: >-
+      Manages the creation, modification, and removal of users and groups on
+      Linux systems, including sudoers entries and SSH key provisioning.
+    options:
+      default_user_shell:
+        description: Default login shell assigned to a user when not overridden per-user.
+        type: str
+        default: /bin/bash
+      users_create_home:
+        description: Whether to create a home directory for managed users.
+        type: bool
+        default: true
+      users_sudo_includedir:
+        description: The `#includedir` (or `#include`) line ensured present in `/etc/sudoers`.
+        type: str
+        default: "#includedir /etc/sudoers.d"
+      default_user_group:
+        description: Default primary group assigned to a user when not overridden per-user.
+        type: str
+        default: users
+      users_home_base_dir:
+        description: Base directory under which user home directories are created.
+        type: str
+        default: /home
