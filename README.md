@@ -164,6 +164,17 @@ gh secret set ANSIBLE_VAULT_PASSWORD --repo iamenr0s/ansible-role-users
 
 To release: tag a commit `vX.Y.Z` and push the tag — CI gates the Galaxy publish.
 
+## Contributing
+
+Contributions are welcome — see [CONTRIBUTING.md](CONTRIBUTING.md) for the
+local pipeline commands and pull request checklist. This project follows the
+[Contributor Covenant Code of Conduct](CODE_OF_CONDUCT.md).
+
+## Security
+
+See [SECURITY.md](SECURITY.md) — GitHub private vulnerability reporting, no
+public issues for security bugs.
+
 ## License
 
 This project is licensed under the [MIT License](LICENSE).
@@ -171,4 +182,5 @@ This project is licensed under the [MIT License](LICENSE).
 ## Author Information
 
 Author: iamenr0s
+
 Galaxy: `iamenr0s.ansible_role_users`
