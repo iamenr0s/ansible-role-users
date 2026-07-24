@@ -6,6 +6,19 @@ argument_specs:
       Manages the creation, modification, and removal of users and groups on
       Linux systems, including sudoers entries and SSH key provisioning.
     options:
+      users_groups:
+        description: >-
+          Groups to create, modify, or remove, e.g. {name, state, gid,
+          system, sudo_options}. See README.md for the full per-item shape.
+        type: list
+        elements: dict
+      users:
+        description: >-
+          Users to create, modify, or remove, e.g. {name, comment, uid,
+          group, groups, state, sudo_options, authorized_keys,
+          manage_ssh_key}. See README.md for the full per-item shape.
+        type: list
+        elements: dict
       default_user_shell:
         description: Default login shell assigned to a user when not overridden per-user.
         type: str
